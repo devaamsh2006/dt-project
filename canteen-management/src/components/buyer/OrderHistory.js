@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../../config';
-import { Container, Typography, Card, CardContent, Grid, Button, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { Container, Typography, Card, CardContent, Grid, Button, Dialog, DialogTitle, DialogContent, Box } from '@mui/material';
 import QRCode from 'react-qr-code';
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
 
@@ -15,11 +17,15 @@ const OrderHistory = () => {
 
   const loadOrders = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const response = await axios.get(`${API_URL}/orders`);
       setOrders(response.data);
     } catch (error) {
       console.error('Error loading orders:', error);
-      alert('Failed to load orders');
+      setError('Failed to load orders. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,6 +38,49 @@ const OrderHistory = () => {
     setQrDialogOpen(false);
     setSelectedOrder(null);
   };
+
+  if (loading) {
+    return (
+      <Container>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <Typography>Loading orders...</Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <Typography color="error">{error}</Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <Container>
+        <Typography variant="h4" style={{ margin: '20px 0' }}>
+          Order History
+        </Typography>
+        <Box 
+          display="flex" 
+          justifyContent="center" 
+          alignItems="center" 
+          minHeight="200px"
+          bgcolor="#f5f5f5"
+          borderRadius={2}
+          p={3}
+        >
+          <Typography variant="h6" color="textSecondary">
+            No orders found. Place an order to see it here!
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -58,7 +107,7 @@ const OrderHistory = () => {
                 </Typography>
                 {order.items.map((item, index) => (
                   <Typography key={index}>
-                    {item.name} x{item.quantity} - ${(item.price * item.quantity).toFixed(2)}
+                    {item.productId?.name || 'Unknown Product'} x{item.quantity} - ${(item.price * item.quantity).toFixed(2)}
                   </Typography>
                 ))}
                 <Typography variant="h6" style={{ marginTop: '10px' }}>

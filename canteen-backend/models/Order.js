@@ -10,13 +10,15 @@ mongoose.connection.on('open', async () => {
 });
 
 const orderSchema = new mongoose.Schema({
-  user: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
   items: [{
-    name: {
-      type: String,
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
       required: true
     },
     quantity: {
@@ -43,10 +45,6 @@ const orderSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  },
-  qrCode: {
-    type: String,
-    default: null
   }
 });
 

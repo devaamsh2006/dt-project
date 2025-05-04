@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const auth = (req, res, next) => {
+const authenticateToken = (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
@@ -23,4 +23,4 @@ const isSeller = (req, res, next) => {
   next();
 };
 
-module.exports = { auth, isSeller };
+module.exports = { authenticateToken, isSeller };
